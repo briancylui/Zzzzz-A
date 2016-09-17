@@ -1,16 +1,9 @@
+#!/usr/bin/env python
 import signal
-import time
-import zmq
-
-context = zmq.Context()
-socket = context.socket(zmq.REP)
-socket.bind("tcp://*:5558")
-# SIGINT will normally raise a KeyboardInterrupt, just like any other Python call
-try:
-    socket.recv()
-except KeyboardInterrupt:
-    print("W: interrupt received, stopping...")
-finally:
-    # clean up
-    socket.close()
-    context.term()
+import sys
+def signal_handler(signal, frame):
+        print('You pressed Ctrl+C!')
+        sys.exit(0)
+signal.signal(signal.SIGINT, signal_handler)
+print('Press Ctrl+C')
+signal.pause()
