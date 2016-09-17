@@ -165,7 +165,7 @@ drowsiness_check_idx = 0
 
 def rotate_check(face_size):
 	face_size /= 10
-	print "face size >> %d" % face_size
+	# print "face size >> %d" % face_size
 	if not hasattr(rotate_check, "full_count"):
 		rotate_check.full_count = 0
 	if not hasattr(rotate_check, "size_distribution"):
@@ -174,18 +174,18 @@ def rotate_check(face_size):
 	rotate_check.size_distribution[face_size/100] += 1
 	
 	percentage = rotate_check.size_distribution[face_size/100] * 100 / rotate_check.full_count
-	print "(%d/%d)" % (rotate_check.size_distribution[face_size/100], rotate_check.full_count)
+	# print "(%d/%d)" % (rotate_check.size_distribution[face_size/100], rotate_check.full_count)
 	if percentage  < 10:
 		print "%d , Fail!" % percentage
 		return False
 	rotate_check.size_distribution[face_size/100] += 1
-	print "Succes!"
+	# print "Succes!"
 	return True
 
 relative_region_list = []
 if glasses == True:
 	relative_region_list = relative_region()
-	print relative_region_list
+	# print relative_region_list
 continuous_error_count = 0
 total_cnt = 0
 error_classified_cnt = 0
@@ -226,8 +226,8 @@ while True:
             prev_eyes = eyes
 
         cv2.rectangle(frame, (a,b), (a+w,b+h), (255,0,0), 1)
-        print "real eyes >> ", 
-        print eyes
+        # print "real eyes >> ", 
+        # print eyes
         eye_full_cnt = 0
         for f_ex,f_ey,f_ew,f_eh in eyes:
             ex, ey, ew, eh = int(f_ex), int(f_ey), int(f_ew), int(f_eh)
@@ -242,10 +242,18 @@ while True:
 
             # Detecting drowsiness using CNN models.
             label = sess.run(tf.argmax(y_conv, 1), feed_dict={keep_prob:1.0, x:input_images})
-            print label
+            # print label
             drowsiness_check_list[drowsiness_check_idx%WINDOW_SIZE] = label[0]
             drowsiness_check_idx += 1
-            print "WOWOWOWOWOW", drowsiness_check_list
+            #############################
+            # Print if face is sleeping #
+            #############################
+            if (0 in drowsiness_check_list):
+                print "AWAKE"
+            else:
+                print "SLEEPING"
+            # print "WOWOWOWOWOW", drowsiness_check_list
+            
             # if drowsiness if detected,
             # imaegs will be shown with red boxing.
             if rotate_check(face_size) == True and continuous_error_count < 5 and drowsiness_check_list == [1]*WINDOW_SIZE:
