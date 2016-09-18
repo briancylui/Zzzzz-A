@@ -23,22 +23,6 @@ stat1 = []
 stat2 = []
 t = []
 
-            # for x in drowsiness_history:
-            #     stat1.append(x.count(0))
-            #     stat2.append(x.count(1))
-            #     t.append(len(t))
-            # trace1 = go.Scatter(
-            #     x = t,
-            #     y = stat1
-            # )
-            # trace2 = go.Scatter(
-            #     x = t,
-            #     y = stat2
-            # )
-            # data = [trace1, trace2]
-            # py.plot(data, filename='basic-line')
-
-
 
 """
 CNN models definition.
@@ -279,17 +263,18 @@ try:
                 #############################
                 # Print if face is sleeping #
                 #############################
+                drowsiness_history.append( drowsiness_check_list )
+                print drowsiness_check_list
                 if (0 in drowsiness_check_list):
                     print "AWAKE"
                 else:
                     print "SLEEPING"
-                    try:
-                        flash.run()
-                    except:
-                        print 'exited from flash'
+                    # try:
+                    #     flash.run()
+                    # except:
+                    #     print 'exited from flash'
 
                 # print "WOWOWOWOWOW", drowsiness_check_list
-                drowsiness_history.append( drowsiness_check_list )
 
                 # if drowsiness if detected,
                 # imaegs will be shown with red boxing.
@@ -321,10 +306,21 @@ try:
     cv2.destroyAllWindows()
 except (KeyboardInterrupt, SystemExit):
     print 'detected exit'
-    print 'detected exit'
-    print 'detected exit'
-    print 'detected exit'
-    print 'detected exit'
+    print drowsiness_history
+    for x in drowsiness_history:
+        stat1.append(x.count(0))
+        stat2.append(x.count(1))
+        t.append(len(t))
+    trace1 = go.Scatter(
+        x = t,
+        y = stat1
+    )
+    trace2 = go.Scatter(
+        x = t,
+        y = stat2
+    )
+    data = [trace1, trace2]
+    # py.plot(data, filename='basic-line')
     raise
 except:
     raise
