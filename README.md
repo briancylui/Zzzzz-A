@@ -3,10 +3,9 @@
 ## Pitch
 Never fall asleep in class again. Zzzzz-A will wake you up when you need it most!
 
-![](pusheen-sleep.gif)
+<img src="pusheen-sleep.gif" height="150"></img>
 <img src="arrow.png" height="150"></img>
-<!-- ![](arrow.png) -->
-![](pusheen-school.jpg)
+<img src="pusheen-school.jpg" height="150"></img>
 
 ## Credited Work
 credit: https://github.com/naseil/Deep-RDD
