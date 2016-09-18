@@ -10,10 +10,7 @@ from getting_glasses_region import relative_region
 face_cascade = cv2.CascadeClassifier("./haarcascade_frontalface_default.xml")
 eye_cascade = cv2.CascadeClassifier("./haarcascade_eye.xml")
 
-import thread
 import flash
-import signal
-import sys
 ############################
 # Graph the Progress Chart #
 ############################
@@ -29,7 +26,7 @@ t = []
             # for x in drowsiness_history:
             #     stat1.append(x.count(0))
             #     stat2.append(x.count(1))
-            #     t.append(len(t))                
+            #     t.append(len(t))
             # trace1 = go.Scatter(
             #     x = t,
             #     y = stat1
@@ -204,7 +201,7 @@ def rotate_check(face_size):
 		rotate_check.size_distribution = [0] * 5000
 	rotate_check.full_count += 1
 	rotate_check.size_distribution[face_size/100] += 1
-	
+
 	percentage = rotate_check.size_distribution[face_size/100] * 100 / rotate_check.full_count
 	# print "(%d/%d)" % (rotate_check.size_distribution[face_size/100], rotate_check.full_count)
 	if percentage  < 10:
@@ -224,98 +221,111 @@ error_classified_cnt = 0
 
 error_path = "./errorounes_classified/"
 error_file_num = 0
-while True:
-	ret, frame = cap.read()
-	total_cnt  += 1
-	frame = cv2.resize(frame,(250,250))
-	gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-	face = face_cascade.detectMultiScale(gray, 1.1, 3)
 
-	error_check = False
-	if len(face) != 1:
-		face=prev_face
-		error_check = True
-		continuous_error_count += 1
-	else:
-		continuous_error_count = 0
-		prev_face = face
-	for a,b,w,h in face:
-		face_size = w*h
-		prev_face = face
-        roi_gray = gray[b:b+h, a:a+w]
-        roi_color = frame[b:b+h, a:a+w]
-        eyes = []
-        if glasses == False:
-            eyes = eye_cascade.detectMultiScale(roi_gray)
-        elif glasses == True and error_check == False:
-			eyes = glasses_region(face, relative_region_list)
-        if len(eyes) != 2:
-            error_check = True
-            eyes = prev_eyes
-            continuous_error_count += 1
-        else:
-            continuous_error_count = 0
-            prev_eyes = eyes
+try:
+    while True:
+        ret, frame = cap.read()
+    	total_cnt  += 1
+    	frame = cv2.resize(frame,(250,250))
+    	gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    	face = face_cascade.detectMultiScale(gray, 1.1, 3)
 
-        cv2.rectangle(frame, (a,b), (a+w,b+h), (255,0,0), 1)
-        # print "real eyes >> ", 
-        # print eyes
-        eye_full_cnt = 0
-        for f_ex,f_ey,f_ew,f_eh in eyes:
-            ex, ey, ew, eh = int(f_ex), int(f_ey), int(f_ew), int(f_eh)
-            eye_region_image = roi_color[ey:ey+eh, ex:ex+ew]
-            prev_eyes = eyes
-            p,q,r = eye_region_image.shape
-            if p==0 or q==0 : break
-            input_images = cv2.resize(eye_region_image, (32,32))
-            input_images.resize((1,32,32,3))
-
-            input_images = np.divide(input_images, 255.0)
-
-            # Detecting drowsiness using CNN models.
-            label = sess.run(tf.argmax(y_conv, 1), feed_dict={keep_prob:1.0, x:input_images})
-            # print label
-            drowsiness_check_list[drowsiness_check_idx%WINDOW_SIZE] = label[0]
-            drowsiness_check_idx += 1
-            #############################
-            # Print if face is sleeping #
-            #############################
-            if (0 in drowsiness_check_list):
-                print "AWAKE"
+    	error_check = False
+    	if len(face) != 1:
+    		face=prev_face
+    		error_check = True
+    		continuous_error_count += 1
+    	else:
+    		continuous_error_count = 0
+    		prev_face = face
+    	for a,b,w,h in face:
+            face_size = w*h
+            prev_face = face
+            roi_gray = gray[b:b+h, a:a+w]
+            roi_color = frame[b:b+h, a:a+w]
+            eyes = []
+            if glasses == False:
+                eyes = eye_cascade.detectMultiScale(roi_gray)
+            elif glasses == True and error_check == False:
+    			eyes = glasses_region(face, relative_region_list)
+            if len(eyes) != 2:
+                error_check = True
+                eyes = prev_eyes
+                continuous_error_count += 1
             else:
-                print "SLEEPING"
-                thread.start_new_thread(flash.run())
-                
-            # print "WOWOWOWOWOW", drowsiness_check_list
-            drowsiness_history.append( drowsiness_check_list )
-            
-            # if drowsiness if detected,
-            # imaegs will be shown with red boxing.
-            if rotate_check(face_size) == True and continuous_error_count < 5 and drowsiness_check_list == [1]*WINDOW_SIZE:
-				cv2.rectangle(roi_color, (int(ex),int(ey)), (int(ex+ew), int(ey+eh)), (0,255,0), 1)
-				eye_full_cnt += 1
-				p,q,r = frame.shape
-				error_classified_cnt += 1		
-				error_file_num += 1
-				error_file_name = error_path + str(error_file_num) + ".jpeg"
-				#cv2.imwrite(error_file_name, frame)
+                continuous_error_count = 0
+                prev_eyes = eyes
 
-				"""
-				for i in xrange(p):
-					for j in xrange(q):
-					    frame[i,j,2] = 150 
-				"""
-            elif rotate_check(face_size) == True:
-				cv2.rectangle(roi_color, (int(ex),int(ey)), (int(ex+ew), int(ey+eh)), (0,255,0), 1)
-        if eye_full_cnt == 2:
-			p,q,r = frame.shape
-			for i in xrange(p):
-				for j in xrange(q):
-					frame[i,j,2] = 150
+            cv2.rectangle(frame, (a,b), (a+w,b+h), (255,0,0), 1)
+            # print "real eyes >> ",
+            # print eyes
+            eye_full_cnt = 0
+            for f_ex,f_ey,f_ew,f_eh in eyes:
+                ex, ey, ew, eh = int(f_ex), int(f_ey), int(f_ew), int(f_eh)
+                eye_region_image = roi_color[ey:ey+eh, ex:ex+ew]
+                prev_eyes = eyes
+                p,q,r = eye_region_image.shape
+                if p==0 or q==0 : break
+                input_images = cv2.resize(eye_region_image, (32,32))
+                input_images.resize((1,32,32,3))
 
-	cv2.imshow("Deep-CNN", frame)
-	if cv2.waitKey(1) & 0xFF == ord('q'):break
-cap.release()
-cv2.destroyAllWindows()
+                input_images = np.divide(input_images, 255.0)
 
+                # Detecting drowsiness using CNN models.
+                label = sess.run(tf.argmax(y_conv, 1), feed_dict={keep_prob:1.0, x:input_images})
+                # print label
+                drowsiness_check_list[drowsiness_check_idx%WINDOW_SIZE] = label[0]
+                drowsiness_check_idx += 1
+                #############################
+                # Print if face is sleeping #
+                #############################
+                if (0 in drowsiness_check_list):
+                    print "AWAKE"
+                else:
+                    print "SLEEPING"
+                    try:
+                        flash.run()
+                    except:
+                        print 'exited from flash'
 
+                # print "WOWOWOWOWOW", drowsiness_check_list
+                drowsiness_history.append( drowsiness_check_list )
+
+                # if drowsiness if detected,
+                # imaegs will be shown with red boxing.
+                if rotate_check(face_size) == True and continuous_error_count < 5 and drowsiness_check_list == [1]*WINDOW_SIZE:
+    				cv2.rectangle(roi_color, (int(ex),int(ey)), (int(ex+ew), int(ey+eh)), (0,255,0), 1)
+    				eye_full_cnt += 1
+    				p,q,r = frame.shape
+    				error_classified_cnt += 1
+    				error_file_num += 1
+    				error_file_name = error_path + str(error_file_num) + ".jpeg"
+    				#cv2.imwrite(error_file_name, frame)
+
+    				"""
+    				for i in xrange(p):
+    					for j in xrange(q):
+    					    frame[i,j,2] = 150
+    				"""
+                elif rotate_check(face_size) == True:
+    				cv2.rectangle(roi_color, (int(ex),int(ey)), (int(ex+ew), int(ey+eh)), (0,255,0), 1)
+            if eye_full_cnt == 2:
+    			p,q,r = frame.shape
+    			for i in xrange(p):
+    				for j in xrange(q):
+    					frame[i,j,2] = 150
+
+    	cv2.imshow("Deep-CNN", frame)
+    	if cv2.waitKey(1) & 0xFF == ord('q'):break
+    cap.release()
+    cv2.destroyAllWindows()
+except (KeyboardInterrupt, SystemExit):
+    print 'detected exit'
+    print 'detected exit'
+    print 'detected exit'
+    print 'detected exit'
+    print 'detected exit'
+    raise
+except:
+    raise
+    # report error and proceed
