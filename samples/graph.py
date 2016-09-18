@@ -50,5 +50,5 @@ trace2 = go.Scatter(
 data = [trace1, trace2]
 
 # Plot and embed in ipython notebook!
-py.iplot(data, filename='basic-line')
+py.plot(data, filename='basic-line')
 

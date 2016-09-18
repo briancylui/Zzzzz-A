@@ -12,7 +12,8 @@ eye_cascade = cv2.CascadeClassifier("./haarcascade_eye.xml")
 
 import thread
 import flash
-
+import signal
+import sys
 ############################
 # Graph the Progress Chart #
 ############################
