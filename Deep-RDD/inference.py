@@ -10,6 +10,9 @@ from getting_glasses_region import relative_region
 face_cascade = cv2.CascadeClassifier("./haarcascade_frontalface_default.xml")
 eye_cascade = cv2.CascadeClassifier("./haarcascade_eye.xml")
 
+import thread
+import flash
+
 ############################
 # Graph the Progress Chart #
 ############################
@@ -280,6 +283,8 @@ while True:
                 print "AWAKE"
             else:
                 print "SLEEPING"
+                thread.start_new_thread(flash.run())
+                
             # print "WOWOWOWOWOW", drowsiness_check_list
             drowsiness_history.append( drowsiness_check_list )
             
